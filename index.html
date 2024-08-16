@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>俺の天気予報</title>
+    <style>
+      .row1 {
+        display: flex;
+        justify-content: center;
+      }
+      .row2 {
+        display: flex;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>一週間の気温</h1>
+    <div id="indexData"></div>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+      axios
+        .get("https://weather.tsukumijima.net/api/forecast/city/400010")
+        .then(function (response) {
+          console.log(response.data);
+          const API_DATA = response.data;
+          const allWeatherData = API_DATA.forecasts;
+          console.log(allWeatherData);
+
+          const temperatureData = allWeatherData.map(function (data) {
+            return data.temperature.max.celsius;
+          });
+          console.log(temperatureData);
+          const dateData = allWeatherData.map(function (data) {
+            return data.date;
+          });
+          console.log(dateData);
+          const dateLabelData = allWeatherData.map(function (data) {
+            return data.dateLabel;
+          });
+          console.log(dateLabelData);
+          const chanceOfRainData = allWeatherData.map(function (data) {
+            return data.chanceOfRain;
+          });
+          console.log(chanceOfRainData);
+          const showData = [];
+          for (let i = 0; i < allWeatherData.length; i++) {
+            showData.push({
+              date: dateData[i],
+              dateLabel: dateLabelData[i],
+              temperature: temperatureData[i],
+              chanceOfRain: chanceOfRainData[i],
+            });
+          }
+          console.log(showData);
+          const showDataHtml = [];
+          for (let i = 0; i < showData.length; i++) {
+            showDataHtml.push(
+              `<div class=row1></div><div><p>${showData[i].dateLabel}<p></div><div><p>${showData[i].date}<p><div><p>${showData[i].temperature}<p></div></div><div class="row2"><div><p>${showData[i].chanceOfRain.T00_06}<p></div>
+                <div><p>${showData[i].chanceOfRain.T06_12}<p></div><div><p>${showData[i].chanceOfRain.T12_18}<p></div><div><p>${showData[i].chanceOfRain.T18_24}<p></div></div>`
+            );
+          }
+          console.log(showDataHtml);
+          const indexData = document.getElementById("indexData");
+          indexData.innerHTML = showDataHtml.join("");
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    </script>
+  </body>
+</html>

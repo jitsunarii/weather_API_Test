@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>福岡市の天気</title>
+    <style>
+      .weather-row {
+        display: flex;
+        justify-content: center;
+      }
+      .weather-column {
+        margin: 0;
+        padding: 10px;
+        text-align: center;
+        border: 1px solid black;
+        box-sizing: border-box;
+        flex: 1;
+      }
+      .weather-header {
+        font-weight: bold;
+        background-color: #f0f0f0;
+      }
+      .weather-table {
+        margin-bottom: 100px;
+        max-width: 1100px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>福岡市の天気</h1>
+    <div id="weatherData"></div>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+      const API_URL = "https://weather.tsukumijima.net/api/forecast/city/400010";
+      const weatherDataContainer = document.getElementById("weatherData");
+
+      async function fetchWeatherData() {
+        try {
+          const response = await axios.get(API_URL);
+          const forecasts = response.data.forecasts;
+          renderWeatherData(forecasts);
+        } catch (error) {
+          console.error("Failed to fetch weather data:", error);
+          weatherDataContainer.innerHTML = "<p>天気情報を取得できませんでした。再度お試しください。</p>";
+        }
+      }
+
+      function createWeatherTable(data) {
+        return `
+          <div class="weather-table">
+            ${createTemperatureRowHtml(data)}
+            ${createRainChanceRowHtml(data.chanceOfRain)}
+          </div>
+        `;
+      }
+
+      function createTemperatureRowHtml(data) {
+        return `
+          <div class="weather-row weather-header">
+            <div class="weather-column">いつ</div>
+            <div class="weather-column">最高気温</div>
+          </div>
+          <div class="weather-row">
+            <div class="weather-column">${data.dateLabel}</div>
+            <div class="weather-column">${data.temperature.max.celsius}℃</div>
+          </div>
+        `;
+      }
+
+      function createRainChanceRowHtml(chanceOfRain) {
+        const timeSlots = ["T00_06", "T06_12", "T12_18", "T18_24"];
+        const timeLabels = ["0~6時", "6~12時", "12~18時", "18~24時"];
+        
+        const headerRow = timeLabels.map(label => `<div class="weather-column">${label}</div>`).join("");
+        const dataRow = timeSlots.map(slot => `<div class="weather-column">${chanceOfRain[slot] || 'N/A'}</div>`).join("");
+        
+        return `
+          <div class="weather-row weather-header">
+            ${headerRow}
+          </div>
+          <div class="weather-row">
+            ${dataRow}
+          </div>
+        `;
+      }
+
+      function renderWeatherData(forecasts) {
+        const weatherTables = forecasts.map(createWeatherTable).join("");
+        weatherDataContainer.innerHTML = weatherTables;
+      }
+
+      fetchWeatherData();
+    </script>
+  </body>
+</html>
